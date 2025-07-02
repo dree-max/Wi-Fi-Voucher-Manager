@@ -51,9 +51,18 @@ async function seed() {
 
     console.log(`Created ${plans.length} voucher plans`);
 
-    // Create some sample vouchers
-    const sampleVouchers = [];
-    for (let i = 0; i < 20; i++) {
+    // Create some sample vouchers with known codes for testing
+    const sampleVouchers = [
+      // Test vouchers with known codes
+      { code: "WIFI-2024-TEST01", planId: plans[0].id, status: 'active' as const, validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
+      { code: "WIFI-2024-TEST02", planId: plans[1].id, status: 'active' as const, validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
+      { code: "WIFI-2024-TEST03", planId: plans[2].id, status: 'active' as const, validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
+      { code: "WIFI-2024-GUEST", planId: plans[3].id, status: 'active' as const, validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
+      { code: "WIFI-2024-USED01", planId: plans[0].id, status: 'used' as const, validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
+    ];
+
+    // Add some random vouchers
+    for (let i = 0; i < 15; i++) {
       const planId = plans[Math.floor(Math.random() * plans.length)].id;
       const code = `WIFI-2024-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
       

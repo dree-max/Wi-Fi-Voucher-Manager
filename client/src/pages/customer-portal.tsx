@@ -32,6 +32,7 @@ export default function CustomerPortal() {
   const form = useForm<RedeemVoucherForm>({
     resolver: zodResolver(redeemVoucherSchema),
     defaultValues: {
+      code: "",
       acceptTerms: false,
     },
   });
@@ -284,6 +285,15 @@ export default function CustomerPortal() {
             </Form>
             
             <div className="mt-8 pt-6 border-t border-gray-200">
+              <div className="text-center mb-4">
+                <p className="text-xs text-gray-500 mb-2">Test voucher codes:</p>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <code className="bg-gray-100 px-2 py-1 rounded text-gray-700">WIFI-2024-TEST01</code>
+                  <code className="bg-gray-100 px-2 py-1 rounded text-gray-700">WIFI-2024-TEST02</code>
+                  <code className="bg-gray-100 px-2 py-1 rounded text-gray-700">WIFI-2024-TEST03</code>
+                  <code className="bg-gray-100 px-2 py-1 rounded text-gray-700">WIFI-2024-GUEST</code>
+                </div>
+              </div>
               <div className="flex items-center justify-center space-x-4 text-sm text-gray-500">
                 <div className="flex items-center space-x-1">
                   <Clock size={14} />

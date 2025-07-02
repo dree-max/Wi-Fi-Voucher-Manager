@@ -115,33 +115,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/vouchers/redeem", async (req, res) => {
     try {
       const { code, deviceInfo } = req.body;
-      const voucher = await storage.getVoucherByCode(code);
+      
+      // Validate input
+      if (!code || !code.trim()) {
+        return res.status(400).json({ message: "Voucher code is required" });
+      }
+
+      // Clean up the voucher code (remove spaces, convert to uppercase)
+      const cleanCode = code.trim().toUpperCase();
+      console.log(`Attempting to redeem voucher: ${cleanCode}`);
+
+      // Find voucher in database
+      const voucher = await storage.getVoucherByCode(cleanCode);
 
       if (!voucher) {
-        return res.status(404).json({ message: "Invalid voucher code" });
+        console.log(`Voucher not found: ${cleanCode}`);
+        return res.status(404).json({ 
+          message: "Invalid voucher code. Please check your code and try again." 
+        });
       }
 
-      if (voucher.status !== "active") {
-        return res.status(400).json({ message: "Voucher already used or expired" });
+      console.log(`Found voucher: ${voucher.code}, status: ${voucher.status}`);
+
+      // Check if voucher is already used
+      if (voucher.status === "used") {
+        return res.status(400).json({ 
+          message: "This voucher has already been used." 
+        });
       }
 
-      // Update voucher status
-      await storage.updateVoucherStatus(voucher.id, "used", deviceInfo.macAddress);
+      // Check if voucher is expired
+      if (voucher.status === "expired") {
+        return res.status(400).json({ 
+          message: "This voucher has expired." 
+        });
+      }
+
+      // Check if voucher is disabled
+      if (voucher.status === "disabled") {
+        return res.status(400).json({ 
+          message: "This voucher has been disabled." 
+        });
+      }
+
+      // Check validity period
+      if (voucher.validUntil && new Date() > new Date(voucher.validUntil)) {
+        // Update status to expired
+        await storage.updateVoucherStatus(voucher.id, "expired");
+        return res.status(400).json({ 
+          message: "This voucher has expired." 
+        });
+      }
+
+      // Voucher is valid - update status to used
+      await storage.updateVoucherStatus(voucher.id, "used", deviceInfo?.macAddress);
 
       // Create user session
       const session = await storage.createUserSession({
         voucherId: voucher.id,
-        ipAddress: deviceInfo.ipAddress,
-        macAddress: deviceInfo.macAddress,
-        deviceType: deviceInfo.deviceType,
-        userAgent: deviceInfo.userAgent,
+        ipAddress: deviceInfo?.ipAddress || "192.168.1.100",
+        macAddress: deviceInfo?.macAddress || "00:11:22:33:44:55",
+        deviceType: deviceInfo?.deviceType || "laptop",
+        userAgent: deviceInfo?.userAgent || "Unknown",
       });
 
-      broadcast({ type: 'session_started', session });
-      res.json({ success: true, session });
+      console.log(`Voucher redeemed successfully: ${cleanCode}`);
+      
+      // Broadcast real-time update
+      broadcast({ 
+        type: 'session_started', 
+        session: {
+          ...session,
+          voucher: voucher
+        }
+      });
+
+      res.json({ 
+        success: true, 
+        session: session,
+        voucher: voucher,
+        message: "Voucher redeemed successfully! You are now connected to WiFi."
+      });
     } catch (error) {
       console.error("Error redeeming voucher:", error);
-      res.status(500).json({ message: "Failed to redeem voucher" });
+      res.status(500).json({ message: "Failed to redeem voucher. Please try again." });
     }
   });
 
