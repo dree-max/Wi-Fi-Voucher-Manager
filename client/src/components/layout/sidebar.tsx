@@ -12,15 +12,19 @@ import {
 } from "lucide-react";
 
 const navigation = [
-  { name: "Dashboard", href: "/", icon: BarChart3 },
-  { name: "Vouchers", href: "/vouchers", icon: Ticket },
-  { name: "Active Sessions", href: "/sessions", icon: Users },
-  { name: "Captive Portal", href: "/portal", icon: Globe },
-  { name: "Analytics", href: "/analytics", icon: TrendingUp },
-  { name: "Settings", href: "/settings", icon: Settings },
+  { name: "Dashboard", href: "/admin", icon: BarChart3 },
+  { name: "Vouchers", href: "/admin/vouchers", icon: Ticket },
+  { name: "Active Sessions", href: "/admin/sessions", icon: Users },
+  { name: "Captive Portal", href: "/admin/portal", icon: Globe },
+  { name: "Analytics", href: "/admin/analytics", icon: TrendingUp },
+  { name: "Settings", href: "/admin/settings", icon: Settings },
 ];
 
-export default function Sidebar() {
+interface SidebarProps {
+  onLogout?: () => void;
+}
+
+export default function Sidebar({ onLogout }: SidebarProps) {
   const [location] = useLocation();
 
   return (
@@ -76,7 +80,11 @@ export default function Sidebar() {
             <p className="text-sm font-medium text-gray-900">John Admin</p>
             <p className="text-xs text-gray-500">Administrator</p>
           </div>
-          <button className="text-gray-400 hover:text-gray-600">
+          <button 
+            className="text-gray-400 hover:text-gray-600"
+            onClick={onLogout}
+            title="Logout"
+          >
             <LogOut size={16} />
           </button>
         </div>

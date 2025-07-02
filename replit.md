@@ -103,8 +103,13 @@ This is a full-stack WiFi voucher management system built with React, Express.js
 
 ## Changelog
 
-Changelog:
 - July 02, 2025. Initial setup
+- July 02, 2025. Added authentication system with separate admin and customer interfaces:
+  * Created admin login page with demo authentication
+  * Separated customer portal as public interface
+  * Updated routing to support /admin paths for authenticated users
+  * Added logout functionality
+  * Seeded database with sample voucher plans and vouchers
 
 ## User Preferences
 
