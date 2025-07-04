@@ -8,13 +8,15 @@ import {
   TrendingUp, 
   Settings, 
   Wifi,
-  LogOut
+  LogOut,
+  Router
 } from "lucide-react";
 
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: BarChart3 },
   { name: "Vouchers", href: "/admin/vouchers", icon: Ticket },
   { name: "Active Sessions", href: "/admin/sessions", icon: Users },
+  { name: "Network Equipment", href: "/admin/network", icon: Router },
   { name: "Captive Portal", href: "/admin/portal", icon: Globe },
   { name: "Analytics", href: "/admin/analytics", icon: TrendingUp },
   { name: "Settings", href: "/admin/settings", icon: Settings },

@@ -10,6 +10,7 @@ import Sessions from "@/pages/sessions";
 import Portal from "@/pages/portal";
 import Analytics from "@/pages/analytics";
 import Settings from "@/pages/settings";
+import NetworkConfig from "@/pages/network-config";
 import AdminLogin from "@/pages/admin-login";
 import CustomerPortal from "@/pages/customer-portal";
 import Sidebar from "@/components/layout/sidebar";
@@ -23,6 +24,7 @@ function AdminRouter() {
       <Route path="/admin" component={Dashboard} />
       <Route path="/admin/vouchers" component={Vouchers} />
       <Route path="/admin/sessions" component={Sessions} />
+      <Route path="/admin/network" component={NetworkConfig} />
       <Route path="/admin/portal" component={Portal} />
       <Route path="/admin/analytics" component={Analytics} />
       <Route path="/admin/settings" component={Settings} />

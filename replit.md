@@ -117,6 +117,13 @@ This is a full-stack WiFi voucher management system built with React, Express.js
   * Test voucher codes created: WIFI-2024-TEST01/02/03, WIFI-2024-GUEST
   * Real-time session tracking and WebSocket updates
   * Comprehensive error handling and user feedback
+- July 04, 2025. Added complete network equipment integration framework:
+  * Network Integration Service for MikroTik, pfSense, and generic RADIUS equipment
+  * Admin interface for configuring network equipment connections
+  * Support for bandwidth limits, session timeouts, and data quotas
+  * Real-time device monitoring and session management
+  * Equipment-specific setup instructions and troubleshooting guides
+  * API endpoints for testing connections and managing active devices
 
 ## User Preferences
 

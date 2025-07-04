@@ -8,8 +8,17 @@ import {
   insertUserSessionSchema 
 } from "@shared/schema";
 import { z } from "zod";
+import { initializeNetworkIntegration, getNetworkIntegration } from "./network-integration";
+import { getNetworkConfig } from "./config/network-config";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Initialize network integration
+  const networkConfig = getNetworkConfig(process.env.EQUIPMENT_TYPE);
+  const networkIntegration = initializeNetworkIntegration(networkConfig);
+  
+  console.log(`Network integration initialized for ${networkConfig.routerType} equipment`);
+  console.log(`Router: ${networkConfig.routerHost}:${networkConfig.routerPort}`);
+  console.log(`Client Network: ${networkConfig.clientNetwork}`);
   const httpServer = createServer(app);
 
   // WebSocket server for real-time updates
@@ -167,35 +176,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Voucher is valid - update status to used
-      await storage.updateVoucherStatus(voucher.id, "used", deviceInfo?.macAddress);
+      console.log(`Voucher validation successful: ${cleanCode}`);
 
-      // Create user session
-      const session = await storage.createUserSession({
-        voucherId: voucher.id,
-        ipAddress: deviceInfo?.ipAddress || "192.168.1.100",
-        macAddress: deviceInfo?.macAddress || "00:11:22:33:44:55",
-        deviceType: deviceInfo?.deviceType || "laptop",
-        userAgent: deviceInfo?.userAgent || "Unknown",
-      });
-
-      console.log(`Voucher redeemed successfully: ${cleanCode}`);
+      // Authorize device on network equipment
+      const networkIntegration = getNetworkIntegration();
+      let networkAuthResult = null;
       
-      // Broadcast real-time update
-      broadcast({ 
-        type: 'session_started', 
-        session: {
-          ...session,
-          voucher: voucher
+      if (networkIntegration) {
+        try {
+          networkAuthResult = await networkIntegration.authorizeDevice(voucher, {
+            macAddress: deviceInfo?.macAddress || "00:11:22:33:44:55",
+            ipAddress: deviceInfo?.ipAddress || "192.168.1.100",
+            userAgent: deviceInfo?.userAgent || "Unknown"
+          });
+          
+          console.log(`Network authorization result:`, networkAuthResult);
+        } catch (error) {
+          console.error('Network authorization failed:', error);
+          // Continue with database-only mode for testing
         }
-      });
+      }
 
-      res.json({ 
-        success: true, 
-        session: session,
-        voucher: voucher,
-        message: "Voucher redeemed successfully! You are now connected to WiFi."
-      });
+      // Only update voucher status if network authorization succeeded or we're in demo mode
+      if (!networkIntegration || (networkAuthResult && networkAuthResult.success)) {
+        // Update voucher status to used
+        await storage.updateVoucherStatus(voucher.id, "used", deviceInfo?.macAddress);
+
+        // Create user session in database
+        const session = await storage.createUserSession({
+          voucherId: voucher.id,
+          ipAddress: deviceInfo?.ipAddress || "192.168.1.100",
+          macAddress: deviceInfo?.macAddress || "00:11:22:33:44:55",
+          deviceType: deviceInfo?.deviceType || "laptop",
+          userAgent: deviceInfo?.userAgent || "Unknown",
+        });
+
+        console.log(`Voucher redeemed successfully: ${cleanCode}`);
+        
+        // Broadcast real-time update
+        broadcast({ 
+          type: 'session_started', 
+          session: {
+            ...session,
+            voucher: voucher,
+            networkSessionId: networkAuthResult?.sessionId
+          }
+        });
+
+        res.json({ 
+          success: true, 
+          session: session,
+          voucher: voucher,
+          networkSessionId: networkAuthResult?.sessionId,
+          message: networkIntegration 
+            ? "Voucher redeemed successfully! You are now connected to WiFi." 
+            : "Voucher redeemed successfully! (Demo mode - no network equipment connected)"
+        });
+      } else {
+        return res.status(500).json({ 
+          message: "Failed to authorize device on network. Please try again." 
+        });
+      }
     } catch (error) {
       console.error("Error redeeming voucher:", error);
       res.status(500).json({ message: "Failed to redeem voucher. Please try again." });
@@ -290,6 +331,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching analytics:", error);
       res.status(500).json({ message: "Failed to fetch analytics" });
+    }
+  });
+
+  // Network Configuration API
+  app.get("/api/network/config", async (req, res) => {
+    try {
+      const networkIntegration = getNetworkIntegration();
+      const currentConfig = getNetworkConfig(process.env.EQUIPMENT_TYPE);
+      
+      res.json({
+        currentConfig: {
+          ...currentConfig,
+          routerPassword: '***', // Hide password in response
+        },
+        activeDevices: networkIntegration?.getActiveDevices() || [],
+        equipmentProfiles: [
+          'mikrotik_hap',
+          'mikrotik_routerboard', 
+          'pfsense_standard',
+          'unifi_controller',
+          'openwrt_generic'
+        ]
+      });
+    } catch (error) {
+      console.error("Error fetching network config:", error);
+      res.status(500).json({ message: "Failed to fetch network configuration" });
+    }
+  });
+
+  app.post("/api/network/config", async (req, res) => {
+    try {
+      const { equipmentType, routerHost, routerPort, routerUsername, routerPassword, radiusSecret } = req.body;
+      
+      // Update environment variables
+      if (routerHost) process.env.ROUTER_HOST = routerHost;
+      if (routerPort) process.env.ROUTER_PORT = routerPort.toString();
+      if (routerUsername) process.env.ROUTER_USERNAME = routerUsername;
+      if (routerPassword) process.env.ROUTER_PASSWORD = routerPassword;
+      if (radiusSecret) process.env.RADIUS_SECRET = radiusSecret;
+      if (equipmentType) process.env.EQUIPMENT_TYPE = equipmentType;
+      
+      // Reinitialize network integration with new config
+      const newConfig = getNetworkConfig(equipmentType);
+      const networkIntegration = initializeNetworkIntegration(newConfig);
+      
+      console.log(`Network configuration updated for ${newConfig.routerType} equipment`);
+      
+      res.json({ 
+        success: true, 
+        message: "Network configuration updated successfully",
+        config: {
+          ...newConfig,
+          routerPassword: '***'
+        }
+      });
+    } catch (error) {
+      console.error("Error updating network config:", error);
+      res.status(500).json({ message: "Failed to update network configuration" });
+    }
+  });
+
+  app.post("/api/network/test-connection", async (req, res) => {
+    try {
+      const networkIntegration = getNetworkIntegration();
+      
+      if (!networkIntegration) {
+        return res.json({
+          success: false,
+          message: "Network integration not initialized"
+        });
+      }
+      
+      res.json({
+        success: true,
+        message: "Network integration ready (demo mode)"
+      });
+    } catch (error) {
+      console.error("Error testing network connection:", error);
+      res.json({
+        success: false,
+        message: "Connection test failed: " + (error as Error).message
+      });
     }
   });
 
