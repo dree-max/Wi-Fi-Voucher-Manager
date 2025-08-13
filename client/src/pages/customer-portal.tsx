@@ -95,7 +95,7 @@ export default function CustomerPortal() {
   if (connectionStep === 'connected') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center p-4">
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-md mx-auto">
           <Card className="border-0 shadow-xl overflow-hidden">
             <div 
               className="h-32 bg-cover bg-center relative"
@@ -150,7 +150,7 @@ export default function CustomerPortal() {
   if (connectionStep === 'connecting') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-md mx-auto">
           <Card className="border-0 shadow-xl overflow-hidden">
             <div 
               className="h-32 bg-cover bg-center relative"
@@ -197,7 +197,7 @@ export default function CustomerPortal() {
   // Initial voucher input screen
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md mx-auto">
         <Card className="border-0 shadow-xl overflow-hidden">
           <div 
             className="h-32 bg-cover bg-center relative"

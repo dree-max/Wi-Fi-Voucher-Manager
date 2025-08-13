@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import { 
@@ -9,8 +10,12 @@ import {
   Settings, 
   Wifi,
   LogOut,
-  Router
+  Router,
+  Menu,
+  X
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: BarChart3 },
@@ -26,11 +31,11 @@ interface SidebarProps {
   onLogout?: () => void;
 }
 
-export default function Sidebar({ onLogout }: SidebarProps) {
+function SidebarContent({ onLogout, onNavigate }: { onLogout?: () => void; onNavigate?: () => void }) {
   const [location] = useLocation();
 
   return (
-    <div className="w-64 bg-white shadow-lg border-r border-gray-200 flex flex-col">
+    <div className="flex flex-col h-full">
       {/* Logo */}
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center space-x-3">
@@ -59,6 +64,7 @@ export default function Sidebar({ onLogout }: SidebarProps) {
                         ? "bg-primary text-white"
                         : "text-gray-700 hover:bg-gray-100"
                     )}
+                    onClick={onNavigate}
                   >
                     <item.icon size={18} />
                     <span>{item.name}</span>
@@ -92,5 +98,39 @@ export default function Sidebar({ onLogout }: SidebarProps) {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Sidebar({ onLogout }: SidebarProps) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  return (
+    <>
+      {/* Mobile menu button */}
+      <div className="lg:hidden fixed top-4 left-4 z-50">
+        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+          <SheetTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              className="bg-white shadow-md"
+            >
+              <Menu size={20} />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="p-0 w-64">
+            <SidebarContent 
+              onLogout={onLogout} 
+              onNavigate={() => setMobileOpen(false)}
+            />
+          </SheetContent>
+        </Sheet>
+      </div>
+
+      {/* Desktop sidebar */}
+      <div className="hidden lg:flex w-64 bg-white shadow-lg border-r border-gray-200 flex-col">
+        <SidebarContent onLogout={onLogout} />
+      </div>
+    </>
   );
 }

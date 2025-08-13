@@ -108,25 +108,25 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 lg:space-y-6">
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
         {statCards.map((stat, index) => (
           <Card key={index}>
-            <CardContent className="p-6">
+            <CardContent className="p-4 lg:p-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">{stat.title}</p>
-                  <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
-                  <p className={`text-sm ${
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-gray-600 truncate">{stat.title}</p>
+                  <p className="text-2xl lg:text-3xl font-bold text-gray-900">{stat.value}</p>
+                  <p className={`text-xs lg:text-sm truncate ${
                     stat.changeType === 'positive' ? 'text-green-600' : 
                     stat.changeType === 'warning' ? 'text-yellow-600' : 'text-red-600'
                   }`}>
                     {stat.change}
                   </p>
                 </div>
-                <div className={`w-12 h-12 bg-opacity-10 rounded-lg flex items-center justify-center ${stat.color.replace('text-', 'bg-')}`}>
-                  <stat.icon className={stat.color} size={24} />
+                <div className={`w-10 h-10 lg:w-12 lg:h-12 bg-opacity-10 rounded-lg flex items-center justify-center flex-shrink-0 ${stat.color.replace('text-', 'bg-')}`}>
+                  <stat.icon className={stat.color} size={20} />
                 </div>
               </div>
             </CardContent>
@@ -135,21 +135,21 @@ export default function Dashboard() {
       </div>
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-6">
         <Card>
-          <CardHeader>
-            <CardTitle>Network Usage (24h)</CardTitle>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">Network Usage (24h)</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             <UsageChart />
           </CardContent>
         </Card>
         
         <Card>
-          <CardHeader>
-            <CardTitle>Voucher Types Distribution</CardTitle>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">Voucher Types Distribution</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             <VoucherDistribution />
           </CardContent>
         </Card>
@@ -157,28 +157,28 @@ export default function Dashboard() {
 
       {/* Recent Activity */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Recent Activity</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+          <CardTitle className="text-lg">Recent Activity</CardTitle>
           <button 
-            className="text-primary text-sm font-medium hover:text-primary/80"
-            onClick={() => navigate('/sessions')}
+            className="text-primary text-sm font-medium hover:text-primary/80 flex-shrink-0"
+            onClick={() => navigate('/admin/sessions')}
           >
             View All
           </button>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
+        <CardContent className="pt-0">
+          <div className="space-y-2 lg:space-y-3">
             {recentActivities.map((activity, index) => (
               <div 
                 key={index} 
-                className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50"
+                className="flex items-center space-x-3 p-2 lg:p-3 rounded-lg hover:bg-gray-50"
               >
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${activity.iconColor}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${activity.iconColor}`}>
                   <activity.icon size={14} />
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">{activity.title}</p>
-                  <p className="text-xs text-gray-500">{activity.description}</p>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">{activity.title}</p>
+                  <p className="text-xs text-gray-500 truncate">{activity.description}</p>
                 </div>
               </div>
             ))}

@@ -69,21 +69,21 @@ export default function Vouchers() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 lg:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+        <div className="min-w-0">
           <h3 className="text-lg font-semibold text-gray-900">Voucher Management</h3>
-          <p className="text-sm text-gray-500">Create and manage WiFi access vouchers</p>
+          <p className="text-sm text-gray-500 hidden sm:block">Create and manage WiFi access vouchers</p>
         </div>
-        <Button onClick={() => setShowCreateModal(true)} className="flex items-center space-x-2">
+        <Button onClick={() => setShowCreateModal(true)} className="flex items-center justify-center space-x-2 w-full sm:w-auto">
           <Plus size={16} />
           <span>Create Vouchers</span>
         </Button>
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -122,11 +122,11 @@ export default function Vouchers() {
       {/* Voucher Table */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col space-y-3 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
             <CardTitle>All Vouchers</CardTitle>
-            <div className="flex items-center space-x-3">
+            <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-3">
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-40">
+                <SelectTrigger className="w-full sm:w-40">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -140,7 +140,7 @@ export default function Vouchers() {
                 placeholder="Search vouchers..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-64"
+                className="w-full sm:w-64"
               />
             </div>
           </div>
