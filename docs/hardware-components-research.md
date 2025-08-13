@@ -68,7 +68,7 @@ This document provides comprehensive research on hardware components and compati
 - **Price**: ~$150-200
 - **Capacity**: 50+ concurrent users
 - **Features**: Native voucher system, cloud management
-- **Integration**: Compatible via generic RADIUS
+- **Integration**: Compatible  novia generic RADIUS
 
 ### Medium Business (50-200 Users)
 **Primary Option**: MikroTik RouterBoard RB4011
