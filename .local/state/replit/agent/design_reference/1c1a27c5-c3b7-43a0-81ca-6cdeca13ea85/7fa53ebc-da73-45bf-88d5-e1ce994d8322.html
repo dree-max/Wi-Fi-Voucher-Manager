@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WiFi Voucher Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#6366F1',
+                        success: '#10B981',
+                        warning: '#F59E0B',
+                        error: '#EF4444',
+                    }
+                }
+            }
+        };
+    </script>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- @COMPONENT: AppShell [Main application layout with sidebar and header] -->
+    <div class="flex h-screen bg-gray-50" id="app">
+        <!-- Sidebar -->
+        <!-- @COMPONENT: Sidebar [Navigation menu with dashboard sections] -->
+        <div class="w-64 bg-white shadow-lg border-r border-gray-200 flex flex-col">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                        <i class="fas fa-wifi text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-semibold text-gray-900">WiFi Manager</h1>
+                        <p class="text-sm text-gray-500">Voucher System</p>
+                    </div>
+                </div>
+            </div>
+            
+            <nav class="flex-1 p-4">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="#" class="flex items-center space-x-3 px-3 py-2 rounded-lg bg-primary text-white" data-section="dashboard">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100" data-section="vouchers">
+                            <i class="fas fa-ticket-alt"></i>
+                            <span>Vouchers</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100" data-section="users">
+                            <i class="fas fa-users"></i>
+                            <span>Active Sessions</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100" data-section="portal">
+                            <i class="fas fa-globe"></i>
+                            <span>Captive Portal</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100" data-section="analytics">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Analytics</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100" data-section="settings">
+                            <i class="fas fa-cog"></i>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="p-4 border-t border-gray-200">
+                <div class="flex items-center space-x-3">
+                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&h=100" alt="Admin Avatar" class="w-10 h-10 rounded-full object-cover">
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-900" data-bind="admin.name">John Admin</p>
+                        <p class="text-xs text-gray-500">Administrator</p>
+                    </div>
+                    <button class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: Sidebar -->
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <!-- @COMPONENT: Header [Top navigation with search and theme toggle] -->
+            <header class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-2xl font-semibold text-gray-900" id="page-title">Dashboard Overview</h2>
+                        <p class="text-sm text-gray-500" id="page-subtitle">Monitor your WiFi voucher system performance</p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button class="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100" id="theme-toggle">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                        <button class="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100">
+                            <i class="fas fa-bell"></i>
+                        </button>
+                        <div class="relative">
+                            <input type="text" placeholder="Search..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <!-- @END_COMPONENT: Header -->
+
+            <!-- Main Content Area -->
+            <main class="flex-1 overflow-y-auto p-6">
+                <!-- Dashboard Section -->
+                <!-- @COMPONENT: DashboardSection [Main dashboard with stats and charts] -->
+                <div id="dashboard-section" class="space-y-6">
+                    <!-- Stats Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Active Vouchers</p>
+                                    <p class="text-3xl font-bold text-gray-900" data-bind="stats.activeVouchers">1,234</p>
+                                    <p class="text-sm text-success">+12% from last month</p>
+                                </div>
+                                <div class="w-12 h-12 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-ticket-alt text-primary text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Connected Users</p>
+                                    <p class="text-3xl font-bold text-gray-900" data-bind="stats.connectedUsers">89</p>
+                                    <p class="text-sm text-success">+5 in last hour</p>
+                                </div>
+                                <div class="w-12 h-12 bg-success bg-opacity-10 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-users text-success text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Data Usage Today</p>
+                                    <p class="text-3xl font-bold text-gray-900" data-bind="stats.dataUsage">2.4 GB</p>
+                                    <p class="text-sm text-warning">85% of limit</p>
+                                </div>
+                                <div class="w-12 h-12 bg-warning bg-opacity-10 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-chart-area text-warning text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Revenue Today</p>
+                                    <p class="text-3xl font-bold text-gray-900" data-bind="stats.revenue">$247</p>
+                                    <p class="text-sm text-success">+18% vs yesterday</p>
+                                </div>
+                                <div class="w-12 h-12 bg-secondary bg-opacity-10 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-dollar-sign text-secondary text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Network Usage (24h)</h3>
+                            <canvas id="usageChart" class="w-full h-64"></canvas>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Voucher Types Distribution</h3>
+                            <canvas id="voucherChart" class="w-full h-64"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">Recent Activity</h3>
+                            <button class="text-primary text-sm font-medium hover:text-primary-dark">View All</button>
+                        </div>
+                        <div class="space-y-3">
+                            <!-- @MAP: activities.map(activity => ( -->
+                            <div class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50">
+                                <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-user-plus text-green-600 text-xs"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-gray-900">New user connected</p>
+                                    <p class="text-xs text-gray-500">Voucher: WIFI-2024-ABC123 • 2 minutes ago</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50">
+                                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-ticket-alt text-blue-600 text-xs"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-gray-900">Voucher batch created</p>
+                                    <p class="text-xs text-gray-500">50 Premium vouchers • 15 minutes ago</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50">
+                                <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-exclamation-triangle text-red-600 text-xs"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-gray-900">Data limit exceeded</p>
+                                    <p class="text-xs text-gray-500">User disconnected • 32 minutes ago</p>
+                                </div>
+                            </div>
+                            <!-- @END_MAP )) -->
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: DashboardSection -->
+
+                <!-- Vouchers Section -->
+                <!-- @COMPONENT: VouchersSection [Voucher management interface] -->
+                <div id="vouchers-section" class="space-y-6 hidden">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900">Voucher Management</h3>
+                            <p class="text-sm text-gray-500">Create and manage WiFi access vouchers</p>
+                        </div>
+                        <button class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark flex items-center space-x-2" data-event="click:openCreateVoucherModal">
+                            <i class="fas fa-plus"></i>
+                            <span>Create Vouchers</span>
+                        </button>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-600">Total Vouchers</p>
+                                    <p class="text-2xl font-bold text-gray-900">5,432</p>
+                                </div>
+                                <i class="fas fa-ticket-alt text-primary text-2xl"></i>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-600">Active</p>
+                                    <p class="text-2xl font-bold text-success">1,234</p>
+                                </div>
+                                <i class="fas fa-check-circle text-success text-2xl"></i>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-600">Expired</p>
+                                    <p class="text-2xl font-bold text-gray-500">3,198</p>
+                                </div>
+                                <i class="fas fa-clock text-gray-500 text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Voucher Table -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                        <div class="p-6 border-b border-gray-200">
+                            <div class="flex items-center justify-between">
+                                <h4 class="text-lg font-semibold text-gray-900">All Vouchers</h4>
+                                <div class="flex items-center space-x-3">
+                                    <select class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                                        <option>All Status</option>
+                                        <option>Active</option>
+                                        <option>Used</option>
+                                        <option>Expired</option>
+                                    </select>
+                                    <input type="text" placeholder="Search vouchers..." class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Voucher Code</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data Limit</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <!-- @MAP: vouchers.map(voucher => ( -->
+                                    <tr class="hover:bg-gray-50" data-mock="true">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="font-mono text-sm font-medium text-gray-900">WIFI-2024-ABC123</div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                Premium
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">24 hours</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">5 GB</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                Active
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2024-01-15</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <button class="text-primary hover:text-primary-dark mr-3">Edit</button>
+                                            <button class="text-red-600 hover:text-red-900">Delete</button>
+                                        </td>
+                                    </tr>
+                                    <tr class="hover:bg-gray-50" data-mock="true">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="font-mono text-sm font-medium text-gray-900">WIFI-2024-DEF456</div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                                Basic
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">2 hours</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">500 MB</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                Used
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2024-01-14</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <button class="text-gray-400 cursor-not-allowed mr-3">Edit</button>
+                                            <button class="text-red-600 hover:text-red-900">Delete</button>
+                                        </td>
+                                    </tr>
+                                    <!-- @END_MAP )) -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="px-6 py-3 border-t border-gray-200 flex items-center justify-between">
+                            <div class="flex items-center">
+                                <p class="text-sm text-gray-700">Showing 1 to 10 of 97 results</p>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button class="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">Previous</button>
+                                <button class="px-3 py-1 bg-primary text-white rounded text-sm">1</button>
+                                <button class="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">2</button>
+                                <button class="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">3</button>
+                                <button class="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">Next</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: VouchersSection -->
+
+                <!-- Active Sessions Section -->
+                <!-- @COMPONENT: ActiveSessionsSection [Real-time user session monitoring] -->
+                <div id="users-section" class="space-y-6 hidden">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900">Active Sessions</h3>
+                            <p class="text-sm text-gray-500">Monitor connected users and their network usage</p>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <button class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark flex items-center space-x-2">
+                                <i class="fas fa-sync-alt"></i>
+                                <span>Refresh</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Live Stats -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-600">Connected Now</p>
+                                    <p class="text-2xl font-bold text-success">89</p>
+                                </div>
+                                <div class="w-3 h-3 bg-success rounded-full animate-pulse"></div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-600">Bandwidth Used</p>
+                                    <p class="text-2xl font-bold text-warning">2.4 Mbps</p>
+                                </div>
+                                <i class="fas fa-tachometer-alt text-warning text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-600">Peak Today</p>
+                                    <p class="text-2xl font-bold text-primary">156</p>
+                                </div>
+                                <i class="fas fa-chart-line text-primary text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-600">Avg. Duration</p>
+                                    <p class="text-2xl font-bold text-gray-700">1.2h</p>
+                                </div>
+                                <i class="fas fa-clock text-gray-500 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sessions Table -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                        <div class="p-6 border-b border-gray-200">
+                            <h4 class="text-lg font-semibold text-gray-900">Current Sessions</h4>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Voucher</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Connected</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data Used</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time Left</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Speed</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <!-- @MAP: sessions.map(session => ( -->
+                                    <tr class="hover:bg-gray-50" data-mock="true">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="w-8 h-8 bg-primary bg-opacity-10 rounded-full flex items-center justify-center">
+                                                    <i class="fas fa-user text-primary text-sm"></i>
+                                                </div>
+                                                <div class="ml-3">
+                                                    <div class="text-sm font-medium text-gray-900">192.168.1.101</div>
+                                                    <div class="text-sm text-gray-500">iPhone</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="font-mono text-sm text-gray-900">WIFI-2024-ABC123</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">23 min ago</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm text-gray-900">1.2 GB / 5 GB</div>
+                                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                                <div class="bg-primary h-2 rounded-full" style="width: 24%"></div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">23h 37m</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">↓ 2.1 Mbps<br>↑ 0.8 Mbps</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <button class="text-red-600 hover:text-red-900 text-sm font-medium">Disconnect</button>
+                                        </td>
+                                    </tr>
+                                    <tr class="hover:bg-gray-50" data-mock="true">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="w-8 h-8 bg-secondary bg-opacity-10 rounded-full flex items-center justify-center">
+                                                    <i class="fas fa-laptop text-secondary text-sm"></i>
+                                                </div>
+                                                <div class="ml-3">
+                                                    <div class="text-sm font-medium text-gray-900">192.168.1.102</div>
+                                                    <div class="text-sm text-gray-500">MacBook</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="font-mono text-sm text-gray-900">WIFI-2024-XYZ789</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">1h 15m ago</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm text-gray-900">450 MB / 500 MB</div>
+                                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                                <div class="bg-warning h-2 rounded-full" style="width: 90%"></div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">45m</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">↓ 1.5 Mbps<br>↑ 0.3 Mbps</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <button class="text-red-600 hover:text-red-900 text-sm font-medium">Disconnect</button>
+                                        </td>
+                                    </tr>
+                                    <!-- @END_MAP )) -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: ActiveSessionsSection -->
+
+                <!-- Captive Portal Section -->
+                <!-- @COMPONENT: CaptivePortalSection [Portal customization and preview] -->
+                <div id="portal-section" class="space-y-6 hidden">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900">Captive Portal</h3>
+                            <p class="text-sm text-gray-500">Customize your branded WiFi login experience</p>
+                        </div>
+                        <button class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark flex items-center space-x-2">
+                            <i class="fas fa-save"></i>
+                            <span>Save Changes</span>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Portal Settings -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <h4 class="text-lg font-semibold text-gray-900 mb-4">Portal Settings</h4>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Business Name</label>
+                                    <input type="text" value="Coffee & Co." class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Welcome Message</label>
+                                    <textarea rows="3" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent">Welcome to our free WiFi! Enter your voucher code to get connected.</textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Primary Color</label>
+                                    <div class="flex items-center space-x-3">
+                                        <input type="color" value="#3B82F6" class="w-12 h-10 border border-gray-300 rounded cursor-pointer">
+                                        <input type="text" value="#3B82F6" class="flex-1 border border-gray-300 rounded-lg px-3 py-2">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Logo Upload</label>
+                                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                                        <i class="fas fa-cloud-upload-alt text-gray-400 text-2xl mb-2"></i>
+                                        <p class="text-sm text-gray-500">Click to upload or drag and drop</p>
+                                        <p class="text-xs text-gray-400">PNG, JPG up to 2MB</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <label class="text-sm font-medium text-gray-700">Terms & Conditions Required</label>
+                                    <div class="relative inline-block w-10 mr-2 select-none">
+                                        <input type="checkbox" checked class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                                        <label class="toggle-label block overflow-hidden h-6 rounded-full bg-primary cursor-pointer"></label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Portal Preview -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-lg font-semibold text-gray-900">Live Preview</h4>
+                                <div class="flex items-center space-x-2 text-sm text-gray-500">
+                                    <i class="fas fa-mobile-alt"></i>
+                                    <span>Mobile View</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Mock Captive Portal -->
+                            <div class="border border-gray-200 rounded-lg overflow-hidden mx-auto max-w-sm">
+                                <!-- A minimalist coffee shop interior with warm lighting and modern furniture -->
+                                <div class="h-32 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1554118811-1e0d58224f24?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=300');"></div>
+                                <div class="p-6 text-center">
+                                    <div class="w-16 h-16 bg-primary bg-opacity-10 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <i class="fas fa-wifi text-primary text-2xl"></i>
+                                    </div>
+                                    <h3 class="text-xl font-bold text-gray-900 mb-2">Coffee & Co.</h3>
+                                    <p class="text-sm text-gray-600 mb-6">Welcome to our free WiFi! Enter your voucher code to get connected.</p>
+                                    
+                                    <div class="space-y-4">
+                                        <div>
+                                            <input type="text" placeholder="Enter voucher code" class="w-full border border-gray-300 rounded-lg px-4 py-3 text-center font-mono text-lg focus:ring-2 focus:ring-primary focus:border-transparent" data-mock="true">
+                                        </div>
+                                        <button class="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-primary-dark transition-colors">
+                                            Connect to WiFi
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="mt-6 pt-4 border-t border-gray-200">
+                                        <div class="flex items-center justify-center space-x-2 text-xs text-gray-500">
+                                            <input type="checkbox" class="rounded">
+                                            <span>I agree to the Terms & Conditions</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: CaptivePortalSection -->
+
+                <!-- Analytics Section -->
+                <!-- @COMPONENT: AnalyticsSection [Comprehensive reporting and analytics] -->
+                <div id="analytics-section" class="space-y-6 hidden">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900">Analytics & Reports</h3>
+                            <p class="text-sm text-gray-500">Detailed insights into your WiFi network usage</p>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <select class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                                <option>Last 7 days</option>
+                                <option>Last 30 days</option>
+                                <option>Last 90 days</option>
+                                <option>Custom Range</option>
+                            </select>
+                            <button class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark flex items-center space-x-2">
+                                <i class="fas fa-download"></i>
+                                <span>Export</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Analytics Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Total Sessions</p>
+                                    <p class="text-3xl font-bold text-gray-900">12,456</p>
+                                    <p class="text-sm text-success">+23% vs last period</p>
+                                </div>
+                                <div class="w-12 h-12 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-users text-primary text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Data Consumed</p>
+                                    <p class="text-3xl font-bold text-gray-900">847 GB</p>
+                                    <p class="text-sm text-warning">+12% vs last period</p>
+                                </div>
+                                <div class="w-12 h-12 bg-success bg-opacity-10 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-chart-area text-success text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Avg Session Time</p>
+                                    <p class="text-3xl font-bold text-gray-900">1.8h</p>
+                                    <p class="text-sm text-success">+5% vs last period</p>
+                                </div>
+                                <div class="w-12 h-12 bg-warning bg-opacity-10 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-clock text-warning text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Revenue</p>
+                                    <p class="text-3xl font-bold text-gray-900">$3,247</p>
+                                    <p class="text-sm text-success">+18% vs last period</p>
+                                </div>
+                                <div class="w-12 h-12 bg-secondary bg-opacity-10 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-dollar-sign text-secondary text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <h4 class="text-lg font-semibold text-gray-900 mb-4">Usage Trends</h4>
+                            <canvas id="trendsChart" class="w-full h-64"></canvas>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <h4 class="text-lg font-semibold text-gray-900 mb-4">Device Types</h4>
+                            <canvas id="devicesChart" class="w-full h-64"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Reports -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <h4 class="text-lg font-semibold text-gray-900 mb-4">Peak Usage Hours</h4>
+                        <div class="grid grid-cols-12 gap-2">
+                            <!-- @MAP: Array.from({length: 24}).map((_, hour) => ( -->
+                            <div class="text-center" data-mock="true">
+                                <div class="h-16 bg-gray-100 rounded mb-2 relative">
+                                    <div class="absolute bottom-0 left-0 right-0 bg-primary rounded" style="height: 45%"></div>
+                                </div>
+                                <div class="text-xs text-gray-500">9AM</div>
+                            </div>
+                            <div class="text-center" data-mock="true">
+                                <div class="h-16 bg-gray-100 rounded mb-2 relative">
+                                    <div class="absolute bottom-0 left-0 right-0 bg-primary rounded" style="height: 67%"></div>
+                                </div>
+                                <div class="text-xs text-gray-500">10AM</div>
+                            </div>
+                            <div class="text-center" data-mock="true">
+                                <div class="h-16 bg-gray-100 rounded mb-2 relative">
+                                    <div class="absolute bottom-0 left-0 right-0 bg-primary rounded" style="height: 89%"></div>
+                                </div>
+                                <div class="text-xs text-gray-500">11AM</div>
+                            </div>
+                            <div class="text-center" data-mock="true">
+                                <div class="h-16 bg-gray-100 rounded mb-2 relative">
+                                    <div class="absolute bottom-0 left-0 right-0 bg-primary rounded" style="height: 100%"></div>
+                                </div>
+                                <div class="text-xs text-gray-500">12PM</div>
+                            </div>
+                            <div class="text-center" data-mock="true">
+                                <div class="h-16 bg-gray-100 rounded mb-2 relative">
+                                    <div class="absolute bottom-0 left-0 right-0 bg-primary rounded" style="height: 78%"></div>
+                                </div>
+                                <div class="text-xs text-gray-500">1PM</div>
+                            </div>
+                            <div class="text-center" data-mock="true">
+                                <div class="h-16 bg-gray-100 rounded mb-2 relative">
+                                    <div class="absolute bottom-0 left-0 right-0 bg-primary rounded" style="height: 56%"></div>
+                                </div>
+                                <div class="text-xs text-gray-500">2PM</div>
+                            </div>
+                            <div class="text-center" data-mock="true">
+                                <div class="h-16 bg-gray-100 rounded mb-2 relative">
+                                    <div class="absolute bottom-0 left-0 right-0 bg-primary rounded" style="height: 34%"></div>
+                                </div>
+                                <div class="text-xs text-gray-500">3PM</div>
+                            </div>
+                            <div class="text-center" data-mock="true">
+                                <div class="h-16 bg-gray-100 rounded mb-2 relative">
+                                    <div class="absolute bottom-0 left-0 right-0 bg-primary rounded" style="height: 43%"></div>
+                                </div>
+                                <div class="text-xs text-gray-500">4PM</div>
+                            </div>
+                            <div class="text-center" data-mock="true">
+                                <div class="h-16 bg-gray-100 rounded mb-2 relative">
+                                    <div class="absolute bottom-0 left-0 right-0 bg-primary rounded" style="height: 67%"></div>
+                                </div>
+                                <div class="text-xs text-gray-500">5PM</div>
+                            </div>
+                            <div class="text-center" data-mock="true">
+                                <div class="h-16 bg-gray-100 rounded mb-2 relative">
+                                    <div class="absolute bottom-0 left-0 right-0 bg-primary rounded" style="height: 45%"></div>
+                                </div>
+                                <div class="text-xs text-gray-500">6PM</div>
+                            </div>
+                            <div class="text-center" data-mock="true">
+                                <div class="h-16 bg-gray-100 rounded mb-2 relative">
+                                    <div class="absolute bottom-0 left-0 right-0 bg-primary rounded" style="height: 23%"></div>
+                                </div>
+                                <div class="text-xs text-gray-500">7PM</div>
+                            </div>
+                            <div class="text-center" data-mock="true">
+                                <div class="h-16 bg-gray-100 rounded mb-2 relative">
+                                    <div class="absolute bottom-0 left-0 right-0 bg-primary rounded" style="height: 12%"></div>
+                                </div>
+                                <div class="text-xs text-gray-500">8PM</div>
+                            </div>
+                            <!-- @END_MAP )) -->
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: AnalyticsSection -->
+
+                <!-- Settings Section -->
+                <!-- @COMPONENT: SettingsSection [System configuration and preferences] -->
+                <div id="settings-section" class="space-y-6 hidden">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900">System Settings</h3>
+                            <p class="text-sm text-gray-500">Configure your WiFi voucher system preferences</p>
+                        </div>
+                        <button class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark flex items-center space-x-2">
+                            <i class="fas fa-save"></i>
+                            <span>Save All</span>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Network Settings -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <h4 class="text-lg font-semibold text-gray-900 mb-4">Network Configuration</h4>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">WiFi Network Name (SSID)</label>
+                                    <input type="text" value="Guest-WiFi" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Gateway IP Address</label>
+                                    <input type="text" value="192.168.1.1" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">DNS Servers</label>
+                                    <input type="text" value="8.8.8.8, 8.8.4.4" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Maximum Concurrent Users</label>
+                                    <input type="number" value="200" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Voucher Defaults -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <h4 class="text-lg font-semibold text-gray-900 mb-4">Default Voucher Settings</h4>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Default Duration</label>
+                                    <select class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent">
+                                        <option>2 hours</option>
+                                        <option>4 hours</option>
+                                        <option>24 hours</option>
+                                        <option>7 days</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Default Data Limit</label>
+                                    <select class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent">
+                                        <option>500 MB</option>
+                                        <option>1 GB</option>
+                                        <option>5 GB</option>
+                                        <option>Unlimited</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Default Speed Limit (Mbps)</label>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label class="block text-xs text-gray-500 mb-1">Download</label>
+                                            <input type="number" value="10" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs text-gray-500 mb-1">Upload</label>
+                                            <input type="number" value="5" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Max Devices per Voucher</label>
+                                    <input type="number" value="3" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Security Settings -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <h4 class="text-lg font-semibold text-gray-900 mb-4">Security & Access Control</h4>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <label class="text-sm font-medium text-gray-700">Enable Content Filtering</label>
+                                        <p class="text-xs text-gray-500">Block access to inappropriate websites</p>
+                                    </div>
+                                    <div class="relative inline-block w-10 mr-2 select-none">
+                                        <input type="checkbox" checked class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                                        <label class="toggle-label block overflow-hidden h-6 rounded-full bg-primary cursor-pointer"></label>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <label class="text-sm font-medium text-gray-700">Require Terms Acceptance</label>
+                                        <p class="text-xs text-gray-500">Users must agree to terms before connecting</p>
+                                    </div>
+                                    <div class="relative inline-block w-10 mr-2 select-none">
+                                        <input type="checkbox" checked class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                                        <label class="toggle-label block overflow-hidden h-6 rounded-full bg-primary cursor-pointer"></label>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <label class="text-sm font-medium text-gray-700">Session Logging</label>
+                                        <p class="text-xs text-gray-500">Keep detailed logs of user sessions</p>
+                                    </div>
+                                    <div class="relative inline-block w-10 mr-2 select-none">
+                                        <input type="checkbox" checked class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                                        <label class="toggle-label block overflow-hidden h-6 rounded-full bg-primary cursor-pointer"></label>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Session Timeout (minutes)</label>
+                                    <input type="number" value="30" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notification Settings -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <h4 class="text-lg font-semibold text-gray-900 mb-4">Notifications & Alerts</h4>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <label class="text-sm font-medium text-gray-700">Email Notifications</label>
+                                        <p class="text-xs text-gray-500">Receive system alerts via email</p>
+                                    </div>
+                                    <div class="relative inline-block w-10 mr-2 select-none">
+                                        <input type="checkbox" checked class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                                        <label class="toggle-label block overflow-hidden h-6 rounded-full bg-primary cursor-pointer"></label>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Admin Email</label>
+                                    <input type="email" value="admin@example.com" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent">
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <label class="text-sm font-medium text-gray-700">Low Credit Alerts</label>
+                                        <p class="text-xs text-gray-500">Alert when vouchers are running low</p>
+                                    </div>
+                                    <div class="relative inline-block w-10 mr-2 select-none">
+                                        <input type="checkbox" checked class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                                        <label class="toggle-label block overflow-hidden h-6 rounded-full bg-primary cursor-pointer"></label>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Alert Threshold (vouchers remaining)</label>
+                                    <input type="number" value="50" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: SettingsSection -->
+            </main>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: AppShell -->
+
+    <!-- Create Voucher Modal -->
+    <!-- @COMPONENT: CreateVoucherModal [Modal for generating new vouchers] -->
+    <div id="createVoucherModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900">Create Vouchers</h3>
+                    <button class="text-gray-400 hover:text-gray-600" onclick="closeModal('createVoucherModal')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="p-6 space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Voucher Type</label>
+                        <select class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <option>Basic (2 hours, 500MB)</option>
+                            <option>Standard (4 hours, 1GB)</option>
+                            <option>Premium (24 hours, 5GB)</option>
+                            <option>Custom</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
+                        <input type="number" value="10" min="1" max="1000" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Duration</label>
+                        <select class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <option>30 minutes</option>
+                            <option>1 hour</option>
+                            <option>2 hours</option>
+                            <option>4 hours</option>
+                            <option>24 hours</option>
+                            <option>7 days</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Data Limit</label>
+                        <select class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <option>100 MB</option>
+                            <option>500 MB</option>
+                            <option>1 GB</option>
+                            <option>5 GB</option>
+                            <option>10 GB</option>
+                            <option>Unlimited</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Speed Limit (Mbps)</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="number" placeholder="Download" value="10" class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <input type="number" placeholder="Upload" value="5" class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Max Devices</label>
+                        <input type="number" value="3" min="1" max="10" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                </div>
+                
+                <div class="border-t border-gray-200 pt-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="text-md font-medium text-gray-900">Advanced Options</h4>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Validity Period</label>
+                            <input type="date" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Price (optional)</label>
+                            <input type="number" step="0.01" placeholder="0.00" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-6 border-t border-gray-200 flex items-center justify-end space-x-3">
+                <button class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50" onclick="closeModal('createVoucherModal')">
+                    Cancel
+                </button>
+                <button class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark" data-event="click:generateVouchers">
+                    Generate Vouchers
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: CreateVoucherModal -->
+
+    <style>
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #3B82F6;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #3B82F6;
+        }
+    </style>
+
+    <script>
+        // TODO: Implement business logic, API calls, and state management
+        
+        (function() {
+            // Navigation handling
+            const navLinks = document.querySelectorAll('[data-section]');
+            const sections = {
+                'dashboard': document.getElementById('dashboard-section'),
+                'vouchers': document.getElementById('vouchers-section'),
+                'users': document.getElementById('users-section'),
+                'portal': document.getElementById('portal-section'),
+                'analytics': document.getElementById('analytics-section'),
+                'settings': document.getElementById('settings-section')
+            };
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const sectionName = link.getAttribute('data-section');
+                    
+                    // Update active nav item
+                    navLinks.forEach(nav => nav.classList.remove('bg-primary', 'text-white'));
+                    navLinks.forEach(nav => nav.classList.add('text-gray-700', 'hover:bg-gray-100'));
+                    link.classList.remove('text-gray-700', 'hover:bg-gray-100');
+                    link.classList.add('bg-primary', 'text-white');
+                    
+                    // Show selected section
+                    Object.values(sections).forEach(section => section.classList.add('hidden'));
+                    sections[sectionName].classList.remove('hidden');
+                    
+                    // Update page title
+                    const titles = {
+                        'dashboard': 'Dashboard Overview',
+                        'vouchers': 'Voucher Management',
+                        'users': 'Active Sessions',
+                        'portal': 'Captive Portal',
+                        'analytics': 'Analytics & Reports',
+                        'settings': 'System Settings'
+                    };
+                    document.getElementById('page-title').textContent = titles[sectionName];
+                });
+            });
+
+            // Chart initialization
+            function initCharts() {
+                // Usage Chart (Dashboard)
+                const usageCtx = document.getElementById('usageChart');
+                if (usageCtx) {
+                    new Chart(usageCtx, {
+                        type: 'line',
+                        data: {
+                            labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+                            datasets: [{
+                                label: 'Active Users',
+                                data: [12, 19, 43, 78, 65, 34],
+                                borderColor: '#3B82F6',
+                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                tension: 0.4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // Voucher Distribution Chart
+                const voucherCtx = document.getElementById('voucherChart');
+                if (voucherCtx) {
+                    new Chart(voucherCtx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Premium', 'Standard', 'Basic'],
+                            datasets: [{
+                                data: [45, 35, 20],
+                                backgroundColor: ['#3B82F6', '#6366F1', '#8B5CF6']
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false
+                        }
+                    });
+                }
+
+                // Trends Chart (Analytics)
+                const trendsCtx = document.getElementById('trendsChart');
+                if (trendsCtx) {
+                    new Chart(trendsCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                            datasets: [{
+                                label: 'Sessions',
+                                data: [120, 190, 300, 500, 200, 300, 450],
+                                backgroundColor: '#3B82F6'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false
+                        }
+                    });
+                }
+
+                // Devices Chart (Analytics)
+                const devicesCtx = document.getElementById('devicesChart');
+                if (devicesCtx) {
+                    new Chart(devicesCtx, {
+                        type: 'pie',
+                        data: {
+                            labels: ['Mobile', 'Laptop', 'Tablet', 'Desktop'],
+                            datasets: [{
+                                data: [55, 25, 15, 5],
+                                backgroundColor: ['#10B981', '#F59E0B', '#EF4444', '#6366F1']
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false
+                        }
+                    });
+                }
+            }
+
+            // Modal handling
+            window.closeModal = function(modalId) {
+                document.getElementById(modalId).classList.add('hidden');
+            };
+
+            // Create voucher modal
+            const createVoucherBtn = document.querySelector('[data-event="click:openCreateVoucherModal"]');
+            if (createVoucherBtn) {
+                createVoucherBtn.addEventListener('click', () => {
+                    document.getElementById('createVoucherModal').classList.remove('hidden');
+                });
+            }
+
+            // Theme toggle
+            const themeToggle = document.getElementById('theme-toggle');
+            let isDark = false;
+            
+            themeToggle.addEventListener('click', () => {
+                isDark = !isDark;
+                if (isDark) {
+                    document.body.classList.add('dark');
+                    themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+                } else {
+                    document.body.classList.remove('dark');
+                    themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+                }
+            });
+
+            // Initialize charts when DOM is loaded
+            setTimeout(initCharts, 100);
+        })();
+    </script>
+</body>
+</html>
