@@ -1,115 +1,116 @@
 import { 
-  pgTable, 
+  mysqlTable, 
   text, 
   serial, 
-  integer, 
+  int, 
+  bigint,
   boolean, 
   timestamp, 
   decimal,
   varchar,
-  jsonb,
+  json,
   index
-} from "drizzle-orm/pg-core";
+} from "drizzle-orm/mysql-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
 
 // Session storage table (required for auth)
-export const sessions = pgTable(
+export const sessions = mysqlTable(
   "sessions",
   {
-    sid: varchar("sid").primaryKey(),
-    sess: jsonb("sess").notNull(),
+    sid: varchar("sid", { length: 255 }).primaryKey(),
+    sess: json("sess").notNull(),
     expire: timestamp("expire").notNull(),
   },
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
 // Users table (admin users)
-export const users = pgTable("users", {
-  id: varchar("id").primaryKey().notNull(),
-  email: varchar("email").unique(),
-  firstName: varchar("first_name"),
-  lastName: varchar("last_name"),
-  profileImageUrl: varchar("profile_image_url"),
-  role: varchar("role").default("admin"),
+export const users = mysqlTable("users", {
+  id: varchar("id", { length: 255 }).primaryKey().notNull(),
+  email: varchar("email", { length: 255 }).unique(),
+  firstName: varchar("first_name", { length: 255 }),
+  lastName: varchar("last_name", { length: 255 }),
+  profileImageUrl: varchar("profile_image_url", { length: 500 }),
+  role: varchar("role", { length: 50 }).default("admin"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Voucher types/plans
-export const voucherPlans = pgTable("voucher_plans", {
+export const voucherPlans = mysqlTable("voucher_plans", {
   id: serial("id").primaryKey(),
-  name: varchar("name").notNull(), // Basic, Standard, Premium, Custom
-  duration: integer("duration").notNull(), // in minutes
-  dataLimit: integer("data_limit"), // in MB, null for unlimited
-  speedLimitDown: integer("speed_limit_down"), // in Mbps
-  speedLimitUp: integer("speed_limit_up"), // in Mbps
-  maxDevices: integer("max_devices").default(1),
+  name: varchar("name", { length: 255 }).notNull(), // Basic, Standard, Premium, Custom
+  duration: int("duration").notNull(), // in minutes
+  dataLimit: int("data_limit"), // in MB, null for unlimited
+  speedLimitDown: int("speed_limit_down"), // in Mbps
+  speedLimitUp: int("speed_limit_up"), // in Mbps
+  maxDevices: int("max_devices").default(1),
   price: decimal("price", { precision: 10, scale: 2 }),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Vouchers
-export const vouchers = pgTable("vouchers", {
+export const vouchers = mysqlTable("vouchers", {
   id: serial("id").primaryKey(),
-  code: varchar("code").notNull().unique(),
-  planId: integer("plan_id").references(() => voucherPlans.id),
-  status: varchar("status").default("active"), // active, used, expired, disabled
-  createdBy: varchar("created_by").references(() => users.id),
+  code: varchar("code", { length: 255 }).notNull().unique(),
+  planId: bigint("plan_id", { mode: "number", unsigned: true }).references(() => voucherPlans.id),
+  status: varchar("status", { length: 50 }).default("active"), // active, used, expired, disabled
+  createdBy: varchar("created_by", { length: 255 }).references(() => users.id),
   validUntil: timestamp("valid_until"),
   usedAt: timestamp("used_at"),
-  usedBy: varchar("used_by"), // MAC address or device identifier
+  usedBy: varchar("used_by", { length: 255 }), // MAC address or device identifier
   createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Active user sessions
-export const userSessions = pgTable("user_sessions", {
+export const userSessions = mysqlTable("user_sessions", {
   id: serial("id").primaryKey(),
-  voucherId: integer("voucher_id").references(() => vouchers.id),
-  ipAddress: varchar("ip_address").notNull(),
-  macAddress: varchar("mac_address"),
-  deviceType: varchar("device_type"), // mobile, laptop, tablet, desktop
+  voucherId: bigint("voucher_id", { mode: "number", unsigned: true }).references(() => vouchers.id),
+  ipAddress: varchar("ip_address", { length: 45 }).notNull(),
+  macAddress: varchar("mac_address", { length: 17 }),
+  deviceType: varchar("device_type", { length: 50 }), // mobile, laptop, tablet, desktop
   userAgent: text("user_agent"),
   startTime: timestamp("start_time").defaultNow(),
   endTime: timestamp("end_time"),
-  dataUsed: integer("data_used").default(0), // in MB
+  dataUsed: int("data_used").default(0), // in MB
   isActive: boolean("is_active").default(true),
   lastActivity: timestamp("last_activity").defaultNow(),
 });
 
 // System settings
-export const systemSettings = pgTable("system_settings", {
+export const systemSettings = mysqlTable("system_settings", {
   id: serial("id").primaryKey(),
-  key: varchar("key").notNull().unique(),
+  key: varchar("key", { length: 255 }).notNull().unique(),
   value: text("value"),
   description: text("description"),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Portal customization
-export const portalSettings = pgTable("portal_settings", {
+export const portalSettings = mysqlTable("portal_settings", {
   id: serial("id").primaryKey(),
-  businessName: varchar("business_name"),
+  businessName: varchar("business_name", { length: 255 }),
   welcomeMessage: text("welcome_message"),
-  primaryColor: varchar("primary_color").default("#3B82F6"),
-  logoUrl: varchar("logo_url"),
+  primaryColor: varchar("primary_color", { length: 7 }).default("#3B82F6"),
+  logoUrl: varchar("logo_url", { length: 500 }),
   termsRequired: boolean("terms_required").default(true),
   termsContent: text("terms_content"),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Analytics data
-export const analyticsData = pgTable("analytics_data", {
+export const analyticsData = mysqlTable("analytics_data", {
   id: serial("id").primaryKey(),
   date: timestamp("date").notNull(),
-  totalSessions: integer("total_sessions").default(0),
-  totalDataUsed: integer("total_data_used").default(0), // in MB
+  totalSessions: int("total_sessions").default(0),
+  totalDataUsed: int("total_data_used").default(0), // in MB
   totalRevenue: decimal("total_revenue", { precision: 10, scale: 2 }).default("0"),
-  avgSessionDuration: integer("avg_session_duration").default(0), // in minutes
-  peakUsers: integer("peak_users").default(0),
-  uniqueDevices: integer("unique_devices").default(0),
+  avgSessionDuration: int("avg_session_duration").default(0), // in minutes
+  peakUsers: int("peak_users").default(0),
+  uniqueDevices: int("unique_devices").default(0),
 });
 
 // Relations

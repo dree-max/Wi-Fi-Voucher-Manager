@@ -6,7 +6,7 @@ async function seed() {
 
   try {
     // Create sample voucher plans
-    const plans = await db.insert(voucherPlans).values([
+    await db.insert(voucherPlans).values([
       {
         name: "Basic",
         duration: 60, // 1 hour
@@ -47,9 +47,12 @@ async function seed() {
         price: "0.00",
         isActive: true,
       }
-    ]).returning();
+    ]);
 
-    console.log(`Created ${plans.length} voucher plans`);
+    // Fetch the created plans to get their IDs
+    const plans = await db.select().from(voucherPlans).orderBy(voucherPlans.id);
+
+    console.log(`Created voucher plans`);
 
     // Create some sample vouchers with known codes for testing
     const sampleVouchers = [
@@ -74,8 +77,8 @@ async function seed() {
       });
     }
 
-    const createdVouchers = await db.insert(vouchers).values(sampleVouchers).returning();
-    console.log(`Created ${createdVouchers.length} sample vouchers`);
+    await db.insert(vouchers).values(sampleVouchers);
+    console.log(`Created ${sampleVouchers.length} sample vouchers`);
 
     console.log("Database seeded successfully!");
   } catch (error) {
