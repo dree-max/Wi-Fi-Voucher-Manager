@@ -2,15 +2,15 @@
 
 ## Database Connection Strings
 
-### Railway Production Database:
+### Supabase Production Database:
 ```
-mysql://root:XabfeomvkLFJvnTUiJLEbgRItrDwNjGX@turntable.proxy.rlwy.net:23949/railway
+postgresql://postgres:[YOUR-PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres
 ```
 
 ### For Vercel Deployment:
 Use this in Vercel environment variables:
 ```
-DATABASE_URL=mysql://root:XabfeomvkLFJvnTUiJLEbgRItrDwNjGX@turntable.proxy.rlwy.net:23949/wifi_voucher_db
+DATABASE_URL=postgresql://postgres:[YOUR-PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres
 ```
 
 ## Deployment Steps
@@ -39,16 +39,16 @@ After deployment, the database will be created automatically when the app runs f
 
 ## Connection String Breakdown
 
-- **Protocol**: `mysql://`
-- **Username**: `root`
-- **Password**: `XabfeomvkLFJvnTUiJLEbgRItrDwNjGX`
-- **Host**: `turntable.proxy.rlwy.net`
-- **Port**: `23949`
-- **Database**: `wifi_voucher_db` (will be created automatically)
+- **Protocol**: `postgresql://`
+- **Username**: `postgres`
+- **Password**: `[YOUR-SUPABASE-PASSWORD]`
+- **Host**: `db.[PROJECT-REF].supabase.co`
+- **Port**: `5432`
+- **Database**: `postgres` (default Supabase database)
 
 ## Next Steps After Deployment
 
 1. Access your deployed app
 2. The database schema will be created automatically
 3. Test the application functionality
-4. Monitor Railway dashboard for database activity
+4. Monitor Supabase dashboard for database activity

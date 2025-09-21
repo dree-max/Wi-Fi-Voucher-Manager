@@ -1,5 +1,5 @@
-import { drizzle } from 'drizzle-orm/mysql2';
-import mysql from 'mysql2';
+import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
 import * as schema from "@shared/schema";
 import { config } from "dotenv";
 
@@ -12,20 +12,9 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-// Parse the database URL to get connection details
-const dbUrl = new URL(process.env.DATABASE_URL);
-const dbName = dbUrl.pathname.slice(1); // Remove leading slash
-
-// Create connection to Railway MySQL
-export const connection = mysql.createConnection({
-  host: dbUrl.hostname,
-  port: parseInt(dbUrl.port),
-  user: dbUrl.username,
-  password: dbUrl.password,
-  database: dbName,
-  ssl: {
-    rejectUnauthorized: false
-  }
+// Create connection to Supabase PostgreSQL
+export const connection = postgres(process.env.DATABASE_URL, {
+  ssl: 'require',
 });
 
 export const db = drizzle(connection, { schema, mode: 'default' });
