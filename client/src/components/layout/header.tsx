@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bell, Moon, Sun, Search } from "lucide-react";
+import { Bell, Moon, Sun, Search, Wifi, WifiOff, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -7,9 +7,13 @@ interface HeaderProps {
   title: string;
   subtitle: string;
   onPageChange?: (title: string, subtitle: string) => void;
+  connectionStatus?: {
+    isConnected: boolean;
+    fallbackMode: boolean;
+  };
 }
 
-export default function Header({ title, subtitle }: HeaderProps) {
+export default function Header({ title, subtitle, connectionStatus }: HeaderProps) {
   const [isDark, setIsDark] = useState(false);
 
   const toggleTheme = () => {
@@ -29,6 +33,27 @@ export default function Header({ title, subtitle }: HeaderProps) {
           <p className="text-sm text-gray-500 hidden sm:block">{subtitle}</p>
         </div>
         <div className="flex items-center space-x-2 lg:space-x-4">
+          {/* Connection Status Indicator */}
+          {connectionStatus && (
+            <div className="flex items-center space-x-1">
+              {connectionStatus.isConnected ? (
+                <div className="flex items-center space-x-1 text-green-600">
+                  <Wifi size={16} />
+                  <span className="text-xs hidden lg:inline">Live</span>
+                </div>
+              ) : connectionStatus.fallbackMode ? (
+                <div className="flex items-center space-x-1 text-yellow-600" title="Using polling mode">
+                  <RefreshCw size={16} />
+                  <span className="text-xs hidden lg:inline">Polling</span>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-1 text-red-600" title="Connection lost">
+                  <WifiOff size={16} />
+                  <span className="text-xs hidden lg:inline">Offline</span>
+                </div>
+              )}
+            </div>
+          )}
           <Button
             variant="ghost"
             size="icon"

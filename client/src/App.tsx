@@ -49,7 +49,7 @@ function App() {
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [currentPage, setCurrentPage] = useState("Dashboard Overview");
   const [currentPageSubtitle, setCurrentPageSubtitle] = useState("Monitor your WiFi voucher system performance");
-  const { lastMessage } = useWebSocket('/ws');
+  const { lastMessage, isConnected, fallbackMode } = useWebSocket('/ws');
 
   // Check for saved admin session
   useEffect(() => {
@@ -99,6 +99,7 @@ function App() {
                   <Header 
                     title={currentPage} 
                     subtitle={currentPageSubtitle}
+                    connectionStatus={{ isConnected, fallbackMode }}
                     onPageChange={(title, subtitle) => {
                       setCurrentPage(title);
                       setCurrentPageSubtitle(subtitle);

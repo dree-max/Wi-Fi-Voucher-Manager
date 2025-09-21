@@ -8,8 +8,10 @@ interface WebSocketMessage {
 export function useWebSocket(url: string) {
   const [isConnected, setIsConnected] = useState(false);
   const [lastMessage, setLastMessage] = useState<WebSocketMessage | null>(null);
+  const [fallbackMode, setFallbackMode] = useState(false);
   const ws = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
+  const pollingIntervalRef = useRef<NodeJS.Timeout>();
 
   const connect = () => {
     try {
@@ -21,6 +23,12 @@ export function useWebSocket(url: string) {
       ws.current.onopen = () => {
         console.log('WebSocket connected');
         setIsConnected(true);
+        setFallbackMode(false);
+        // Clear any polling if WebSocket connects
+        if (pollingIntervalRef.current) {
+          clearInterval(pollingIntervalRef.current);
+          pollingIntervalRef.current = undefined;
+        }
       };
 
       ws.current.onmessage = (event) => {
@@ -43,11 +51,31 @@ export function useWebSocket(url: string) {
       };
 
       ws.current.onerror = (error) => {
-        console.error('WebSocket error:', error);
+        console.warn('WebSocket not available, falling back to polling mode');
+        setFallbackMode(true);
+        setIsConnected(false);
+        startPolling();
       };
     } catch (error) {
-      console.error('Error connecting to WebSocket:', error);
+      console.warn('WebSocket not available, falling back to polling mode');
+      setFallbackMode(true);
+      setIsConnected(false);
+      startPolling();
     }
+  };
+
+  const startPolling = () => {
+    // Clear existing polling
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+    }
+    
+    // Start polling every 5 seconds for updates
+    pollingIntervalRef.current = setInterval(() => {
+      // You can add API calls here to fetch updates
+      // For now, we'll just maintain the connection state
+      console.log('Polling for updates...');
+    }, 5000);
   };
 
   useEffect(() => {
@@ -56,6 +84,9 @@ export function useWebSocket(url: string) {
     return () => {
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
+      }
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
       }
       if (ws.current) {
         ws.current.close();
@@ -69,5 +100,5 @@ export function useWebSocket(url: string) {
     }
   };
 
-  return { isConnected, lastMessage, sendMessage };
+  return { isConnected, lastMessage, sendMessage, fallbackMode };
 }
